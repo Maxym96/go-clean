@@ -5,35 +5,48 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
-	"github.com/gin-gonic/gin"
+	"go-clean/config"
+	amqprpc "go-clean/internal/controller/amqp_rpc"
+	v1 "go-clean/internal/controller/http/v1"
+	"go-clean/internal/usecase"
+	"go-clean/internal/usecase/repo"
+	"go-clean/internal/usecase/webapi"
+	"go-clean/pkg/httpserver"
+	"go-clean/pkg/logger"
+	"go-clean/pkg/postgres"
+	"go-clean/pkg/rabbitmq/rmq_rpc/server"
 
-	"github.com/evrone/go-clean-template/config"
-	amqprpc "github.com/evrone/go-clean-template/internal/controller/amqp_rpc"
-	v1 "github.com/evrone/go-clean-template/internal/controller/http/v1"
-	"github.com/evrone/go-clean-template/internal/usecase"
-	"github.com/evrone/go-clean-template/internal/usecase/repo"
-	"github.com/evrone/go-clean-template/internal/usecase/webapi"
-	"github.com/evrone/go-clean-template/pkg/httpserver"
-	"github.com/evrone/go-clean-template/pkg/logger"
-	"github.com/evrone/go-clean-template/pkg/postgres"
-	"github.com/evrone/go-clean-template/pkg/rabbitmq/rmq_rpc/server"
+	"github.com/gin-gonic/gin"
 )
 
 // Run creates objects via constructors.
-func Run(cfg *config.Config) {
-	l := logger.New(cfg.Log.Level)
+func Run(cfg *config.Configuration) {
+	l := logger.New(cfg.LogLevel)
 
 	// Repository
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	pgPoolMax, err := strconv.Atoi(cfg.PgPoolMax)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - pgPoolMax.Atoi: %w", err))
+		return
+	}
+	pg, err := postgres.New(cfg.PostgreSQLUrl, postgres.MaxPoolSize(pgPoolMax))
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres.New: %w", err))
 	}
 	defer pg.Close()
 
+	//Postgres migration
+	err = postgres.Migrate(cfg)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - unable to apply migrations: %q\n", err))
+		return
+	}
+
 	// Use case
-	translationUseCase := usecase.New(
+	translationUseCase := usecase.NewTranslationUseCase(
 		repo.New(pg),
 		webapi.New(),
 	)
@@ -41,7 +54,7 @@ func Run(cfg *config.Config) {
 	// RabbitMQ RPC Server
 	rmqRouter := amqprpc.NewRouter(translationUseCase)
 
-	rmqServer, err := server.New(cfg.RMQ.URL, cfg.RMQ.ServerExchange, rmqRouter, l)
+	rmqServer, err := server.New(cfg.RabbitMQUrl, cfg.RmqRpcServer, rmqRouter, l)
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - rmqServer - server.New: %w", err))
 	}
@@ -49,7 +62,7 @@ func Run(cfg *config.Config) {
 	// HTTP Server
 	handler := gin.New()
 	v1.NewRouter(handler, l, translationUseCase)
-	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(handler, httpserver.Port(cfg.HttpPort))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

@@ -1,0 +1,47 @@
+{
+  "prod": {
+    "migrateToVersion": "latest",
+    "migrationLocation": "migrations",
+    "disableSwaggerHttpHandler": "true",
+    "ginMode": "release",
+    "postgreSQLUrl": "postgres://user:pass@localhost:5442/clean",
+    "rabbitMQUrl": "amqp://guest:guest@localhost:5672/",
+    "appName": "go-clean-template",
+    "appVersion": "1.0.0",
+    "httpPort": "8080",
+    "logLevel": "debug",
+    "pgPoolMax": "2",
+    "rmqRpcServer": "rpc_server",
+    "rmqRpcClient": "rpc_client"
+  },
+  "develop": {
+    "migrateToVersion": "latest",
+    "migrationLocation": "migrations",
+    "disableSwaggerHttpHandler": "true",
+    "ginMode": "release",
+    "postgreSQLUrl": "postgres://user:pass@localhost:5442/clean",
+    "rabbitMQUrl": "amqp://guest:guest@localhost:5672/",
+    "appName": "go-clean-template",
+    "appVersion": "1.0.0",
+    "httpPort": "8080",
+    "logLevel": "debug",
+    "pgPoolMax": "2",
+    "rmqRpcServer": "rpc_server",
+    "rmqRpcClient": "rpc_client"
+  },
+  "stage": {
+    "migrateToVersion": "latest",
+    "migrationLocation": "migrations",
+    "disableSwaggerHttpHandler": "true",
+    "ginMode": "release",
+    "postgreSQLUrl": "postgres://user:pass@localhost:5442/clean",
+    "rabbitMQUrl": "amqp://guest:guest@localhost:5672/",
+    "appName": "go-clean-template",
+    "appVersion": "1.0.0",
+    "httpPort": "8080",
+    "logLevel": "debug",
+    "pgPoolMax": "2",
+    "rmqRpcServer": "rpc_server",
+    "rmqRpcClient": "rpc_client"
+  }
+}

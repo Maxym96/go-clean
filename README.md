@@ -1,24 +1,11 @@
-![Go Clean Template](docs/img/logo.svg)
 
-# Go Clean template
-[🇨🇳中文](README_CN.md)
-
-Clean Architecture template for Golang services
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/evrone/go-clean-template)](https://goreportcard.com/report/github.com/evrone/go-clean-template)
-[![License](https://img.shields.io/github/license/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/blob/master/LICENSE)
-[![Release](https://img.shields.io/github/v/release/evrone/go-clean-template.svg)](https://github.com/evrone/go-clean-template/releases/)
-[![codecov](https://codecov.io/gh/evrone/go-clean-template/branch/master/graph/badge.svg?token=XE3E0X3EVQ)](https://codecov.io/gh/evrone/go-clean-template)
+# Clean Architecture template for Golang services
 
 ## Overview
 The purpose of the template is to show:
 - how to organize a project and prevent it from turning into spaghetti code
 - where to store business logic so that it remains independent, clean, and extensible
 - how not to lose control when a microservice grows
-
-Using the principles of Robert Martin (aka Uncle Bob).
-
-[Go-clean-template](https://evrone.com/go-clean-template?utm_source=github&utm_campaign=go-clean-template) is created & supported by [Evrone](https://evrone.com/?utm_source=github&utm_campaign=go-clean-template).
 
 ## Content
 - [Quick start](#quick-start)
@@ -28,11 +15,12 @@ Using the principles of Robert Martin (aka Uncle Bob).
 
 ## Quick start
 Local development:
-```sh
+```bash
 # Postgres, RabbitMQ
-$ make compose-up
+$ sudo docker run --rm --name go-clean -e POSTGRES_PASSWORD=pass -e POSTGRES_USER=user -e POSTGRES_DB=clean -d -p 5442:5432 -v $HOME/docker/volumes/postgres8:/var/lib/postgresql/data postgres
+$ sudo docker run -d --hostname my-rabbit --name some-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
 # Run app with migrations
-$ make run
+$ go run -o ../go-clean cmd/app/main.go
 ```
 
 Integration tests (can be run in CI):

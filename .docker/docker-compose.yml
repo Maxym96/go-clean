@@ -21,12 +21,12 @@ services:
       - 15672:15672
 
   app:
-    build: .
+    build: ..
     container_name: app
     image: app
     environment:
-      PG_URL: 'postgres://user:pass@postgres:5432/postgres'
-      RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'
+      postgreSQLUrl: 'postgres://user:pass@postgres:5432/postgres'
+      rabbitMQUrl: 'amqp://guest:guest@rabbitmq:5672/'
     ports:
       - 8080:8080
     depends_on:
@@ -35,8 +35,8 @@ services:
 
   integration:
     build:
-      context: .
-      dockerfile: integration-test/Dockerfile
+      context: ..
+      dockerfile: ../integration-test/Dockerfile
     container_name: integration
     image: integration
     depends_on:

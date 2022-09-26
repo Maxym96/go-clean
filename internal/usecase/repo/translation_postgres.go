@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/evrone/go-clean-template/internal/entity"
-	"github.com/evrone/go-clean-template/pkg/postgres"
+	"go-clean/internal/entity"
+	"go-clean/pkg/postgres"
 )
-
-const _defaultEntityCap = 64
 
 // TranslationRepo -.
 type TranslationRepo struct {
@@ -22,6 +20,8 @@ func New(pg *postgres.Postgres) *TranslationRepo {
 
 // GetHistory -.
 func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation, error) {
+	var entities []entity.Translation
+
 	sql, _, err := r.Builder.
 		Select("source, destination, original, translation").
 		From("history").
@@ -35,8 +35,6 @@ func (r *TranslationRepo) GetHistory(ctx context.Context) ([]entity.Translation,
 		return nil, fmt.Errorf("TranslationRepo - GetHistory - r.Pool.Query: %w", err)
 	}
 	defer rows.Close()
-
-	entities := make([]entity.Translation, 0, _defaultEntityCap)
 
 	for rows.Next() {
 		e := entity.Translation{}

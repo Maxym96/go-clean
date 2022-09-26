@@ -1,64 +1,61 @@
 package config
 
 import (
-	"fmt"
+	"log"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/spf13/viper"
 )
 
-type (
-	// Config -.
-	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"logger"`
-		PG   `yaml:"postgres"`
-		RMQ  `yaml:"rabbitmq"`
-	}
-
-	// App -.
-	App struct {
-		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
-		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
-	}
-
-	// HTTP -.
-	HTTP struct {
-		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
-	}
-
-	// Log -.
-	Log struct {
-		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
-	}
-
-	// PG -.
-	PG struct {
-		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		URL     string `env-required:"true"                 env:"PG_URL"`
-	}
-
-	// RMQ -.
-	RMQ struct {
-		ServerExchange string `env-required:"true" yaml:"rpc_server_exchange" env:"RMQ_RPC_SERVER"`
-		ClientExchange string `env-required:"true" yaml:"rpc_client_exchange" env:"RMQ_RPC_CLIENT"`
-		URL            string `env-required:"true"                            env:"RMQ_URL"`
-	}
+const (
+	ConfigurationPath = "./config"
+	ConfigurationName = "config"
+	ConfigurationType = "json"
 )
+
+type Configuration struct {
+	MigrateToVersion          string
+	MigrationLocation         string
+	DisableSwaggerHttpHandler string
+	GinMode                   string
+	PostgreSQLUrl             string
+	RabbitMQUrl               string
+	AppName                   string
+	AppVersion                string
+	HttpPort                  string
+	LogLevel                  string
+	PgPoolMax                 string
+	RmqRpcServer              string
+	RmqRpcClient              string
+}
 
 // NewConfig returns app config.
-func NewConfig() (*Config, error) {
-	cfg := &Config{}
+func NewConfig() (*Configuration, error) {
+	v := viper.New()
+	v.AddConfigPath(ConfigurationPath)
+	v.SetConfigName(ConfigurationName)
+	v.SetConfigType(ConfigurationType)
 
-	err := cleanenv.ReadConfig("./config/config.yml", cfg)
+	v.AutomaticEnv()
+
+	err := v.ReadInConfig()
 	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+		log.Fatalf("NewConfig: %v", err)
+		return &Configuration{}, err
 	}
 
-	err = cleanenv.ReadEnv(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
+	return &Configuration{
+		MigrateToVersion:          v.Get("develop.migrateToVersion").(string),
+		MigrationLocation:         v.Get("develop.migrationLocation").(string),
+		DisableSwaggerHttpHandler: v.Get("develop.disableSwaggerHttpHandler").(string),
+		GinMode:                   v.Get("develop.ginMode").(string),
+		PostgreSQLUrl:             v.Get("develop.postgreSQLUrl").(string),
+		RabbitMQUrl:               v.Get("develop.rabbitMQUrl").(string),
+		AppName:                   v.Get("develop.appName").(string),
+		AppVersion:                v.Get("develop.appVersion").(string),
+		HttpPort:                  v.Get("develop.httpPort").(string),
+		LogLevel:                  v.Get("develop.logLevel").(string),
+		PgPoolMax:                 v.Get("develop.pgPoolMax").(string),
+		RmqRpcServer:              v.Get("develop.rmqRpcServer").(string),
+		RmqRpcClient:              v.Get("develop.rmqRpcClient").(string),
+	}, err
 }

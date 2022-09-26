@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/evrone/go-clean-template/internal/entity"
+	"go-clean/internal/entity"
 )
 
 // TranslationUseCase -.
@@ -13,8 +13,8 @@ type TranslationUseCase struct {
 	webAPI TranslationWebAPI
 }
 
-// New -.
-func New(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
+// NewTranslationUseCase -.
+func NewTranslationUseCase(r TranslationRepo, w TranslationWebAPI) *TranslationUseCase {
 	return &TranslationUseCase{
 		repo:   r,
 		webAPI: w,
